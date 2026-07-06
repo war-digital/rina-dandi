@@ -372,36 +372,64 @@ const defaultWishes = [
     }
 ];
 
+// Paste your Google Apps Script Web App URL here between the quotes
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyqb-6I7yxqSuy7YXa6ZPt8-gUI_Tp4WFWEiw9Bf1F1TK_aVkBdb7B-o3VNflAmfQALQA/exec'; 
+
 function initRSVP() {
     const form = document.getElementById('rsvp-form');
     const wishesList = document.getElementById('wishes-list');
     if (!form || !wishesList) return;
 
-    // Retrieve from localStorage or set defaults safely
     let storedWishes = [];
-    try {
-        const storedData = localStorage.getItem('wedding_wishes');
-        if (storedData) {
-            const parsed = JSON.parse(storedData);
-            if (Array.isArray(parsed)) {
-                storedWishes = parsed;
+
+    // Load wishes from Google Sheet or fallback to localStorage
+    function loadWishes() {
+        if (SCRIPT_URL) {
+            fetch(`${SCRIPT_URL}?action=read`)
+                .then(response => response.json())
+                .then(res => {
+                    if (res.status === 'success' && Array.isArray(res.data)) {
+                        storedWishes = res.data;
+                        renderWishes(storedWishes);
+                    } else {
+                        fallbackToLocal();
+                    }
+                })
+                .catch(err => {
+                    console.warn("Failed to fetch wishes from Google Sheets: ", err);
+                    fallbackToLocal();
+                });
+        } else {
+            fallbackToLocal();
+        }
+    }
+
+    function fallbackToLocal() {
+        try {
+            const storedData = localStorage.getItem('wedding_wishes');
+            if (storedData) {
+                const parsed = JSON.parse(storedData);
+                if (Array.isArray(parsed)) {
+                    storedWishes = parsed;
+                }
+            }
+        } catch (e) {
+            console.warn("localStorage is not accessible: ", e);
+        }
+
+        if (!storedWishes || storedWishes.length === 0) {
+            storedWishes = defaultWishes;
+            try {
+                localStorage.setItem('wedding_wishes', JSON.stringify(storedWishes));
+            } catch (e) {
+                console.warn("Failed to set localStorage: ", e);
             }
         }
-    } catch (e) {
-        console.warn("localStorage is not accessible: ", e);
+        renderWishes(storedWishes);
     }
 
-    if (!storedWishes || storedWishes.length === 0) {
-        storedWishes = defaultWishes;
-        try {
-            localStorage.setItem('wedding_wishes', JSON.stringify(storedWishes));
-        } catch (e) {
-            console.warn("Failed to set localStorage: ", e);
-        }
-    }
-
-    // Render wishes
-    renderWishes(storedWishes);
+    // Initial load
+    loadWishes();
 
     // Form submit listener
     form.addEventListener('submit', (e) => {
@@ -410,31 +438,78 @@ function initRSVP() {
         const nameInput = document.getElementById('form-name');
         const attendanceInput = document.getElementById('form-attendance');
         const wishInput = document.getElementById('form-wish');
+        const guestsInput = document.getElementById('form-guests');
         if (!nameInput || !attendanceInput || !wishInput) return;
+
+        const guestsVal = guestsInput ? guestsInput.value : "1";
 
         const newWish = {
             name: nameInput.value.trim(),
             attendance: attendanceInput.value,
             wish: wishInput.value.trim(),
+            guests: guestsVal,
             timestamp: Date.now()
         };
 
-        // Add to front of the array
-        storedWishes.unshift(newWish);
-        
+        // Disable submit button during request
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Mengirim...';
+        }
+
+        if (SCRIPT_URL) {
+            // Save to Google Sheets
+            const urlParams = new URLSearchParams({
+                action: 'write',
+                name: newWish.name,
+                wish: newWish.wish,
+                attendance: newWish.attendance,
+                guests: newWish.guests
+            });
+
+            fetch(`${SCRIPT_URL}?${urlParams.toString()}`)
+                .then(response => response.json())
+                .then(res => {
+                    if (res.status === 'success') {
+                        loadWishes(); // reload board
+                    } else {
+                        alert("Gagal mengirim ke Google Sheets. Menyimpan secara lokal.");
+                        saveLocally(newWish);
+                    }
+                })
+                .catch(err => {
+                    console.warn("Error posting wish to Sheets: ", err);
+                    saveLocally(newWish);
+                })
+                .finally(() => {
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = 'Kirim Konfirmasi';
+                    }
+                    form.reset();
+                    wishesList.scrollTop = 0;
+                });
+        } else {
+            saveLocally(newWish);
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Kirim Konfirmasi';
+            }
+            form.reset();
+            wishesList.scrollTop = 0;
+        }
+    });
+
+    function saveLocally(wish) {
+        storedWishes.unshift(wish);
         try {
             localStorage.setItem('wedding_wishes', JSON.stringify(storedWishes));
         } catch (err) {
             console.warn("Failed to save wish to localStorage: ", err);
         }
-
-        // Re-render and reset form
         renderWishes(storedWishes);
-        form.reset();
-
-        // Highlight/scroll to the top of wishes board
-        wishesList.scrollTop = 0;
-    });
+    }
 }
 
 function renderWishes(wishes) {
@@ -467,7 +542,13 @@ function renderWishes(wishes) {
 }
 
 function formatRelativeTime(timestamp) {
-    const diff = Date.now() - timestamp;
+    if (!timestamp) return 'Baru saja';
+    
+    // Safely parse timestamp to number
+    const timeMs = typeof timestamp === 'number' ? timestamp : new Date(timestamp).getTime();
+    if (isNaN(timeMs)) return 'Baru saja';
+    
+    const diff = Date.now() - timeMs;
     const minutes = Math.floor(diff / 60000);
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
