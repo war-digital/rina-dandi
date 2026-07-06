@@ -197,22 +197,26 @@ function initOpenButton() {
     btn.addEventListener('click', () => {
         // 1. Play Background Music with legacy browser promise checks
         if (audio) {
-            const playPromise = audio.play();
-            if (playPromise !== undefined && typeof playPromise.then === 'function') {
-                playPromise.then(() => {
+            try {
+                const playPromise = audio.play();
+                if (playPromise !== undefined && typeof playPromise.then === 'function') {
+                    playPromise.then(() => {
+                        if (musicContainer) {
+                            musicContainer.classList.add('animate-rotate-slow');
+                            musicContainer.classList.remove('paused');
+                        }
+                    }).catch(err => {
+                        console.log("Autoplay was blocked or audio failed to load: ", err);
+                    });
+                } else {
+                    // Fallback for legacy webviews that return undefined for play()
                     if (musicContainer) {
                         musicContainer.classList.add('animate-rotate-slow');
                         musicContainer.classList.remove('paused');
                     }
-                }).catch(err => {
-                    console.log("Autoplay was blocked or audio failed to load: ", err);
-                });
-            } else {
-                // Fallback for legacy webviews that return undefined for play()
-                if (musicContainer) {
-                    musicContainer.classList.add('animate-rotate-slow');
-                    musicContainer.classList.remove('paused');
                 }
+            } catch (playError) {
+                console.warn("Audio play crashed synchronously: ", playError);
             }
         }
 
@@ -251,9 +255,13 @@ function initMusicControls() {
 
     musicBtn.addEventListener('click', () => {
         if (audio.paused) {
-            const playPromise = audio.play();
-            if (playPromise !== undefined && typeof playPromise.then === 'function') {
-                playPromise.catch(err => console.log("Audio play failed: ", err));
+            try {
+                const playPromise = audio.play();
+                if (playPromise !== undefined && typeof playPromise.then === 'function') {
+                    playPromise.catch(err => console.log("Audio play failed: ", err));
+                }
+            } catch (playError) {
+                console.warn("Audio play crashed synchronously: ", playError);
             }
             musicBtn.classList.remove('paused');
         } else {
@@ -374,7 +382,10 @@ function initRSVP() {
     try {
         const storedData = localStorage.getItem('wedding_wishes');
         if (storedData) {
-            storedWishes = JSON.parse(storedData);
+            const parsed = JSON.parse(storedData);
+            if (Array.isArray(parsed)) {
+                storedWishes = parsed;
+            }
         }
     } catch (e) {
         console.warn("localStorage is not accessible: ", e);
