@@ -533,32 +533,49 @@ a {
     font-size: 1.6rem;
     margin-bottom: 20px;
 }
+.quote-box {
+    background-color: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    padding: 32px 24px;
+    margin: 20px auto 0;
+    max-width: 100%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    text-align: center;
+}
 
 .section-subtitle {
     font-size: 0.95rem;
     font-weight: 500;
     letter-spacing: 4px;
-    color: var(--text-dark);
-    margin-bottom: 24px;
+    color: var(--secondary-light);
+    margin-bottom: 18px;
     text-transform: uppercase;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
 }
 
 .verse-text {
-    font-family: var(--font-heading);
-    font-size: 1.15rem;
-    color: var(--text-dark);
+    font-family: 'Playfair Display', 'Georgia', serif;
+    font-size: 0.95rem;
+    color: #ffffff;
     font-style: italic;
     max-width: 800px;
     margin: 0 auto 16px;
     line-height: 1.8;
+    text-transform: none;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
 }
 
 .verse-ref {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 600;
     letter-spacing: 2px;
-    color: var(--primary-color);
+    color: var(--secondary-light);
     text-transform: uppercase;
+    margin: 0;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
 }
 
 /* ==============================================
@@ -1428,8 +1445,8 @@ a {
 /* Scroll Animation Hooks */
 .animate-on-scroll {
     opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 1s ease-out, transform 1s ease-out;
+    transform: translateY(30px);
+    transition: opacity 2.0s cubic-bezier(0.215, 0.61, 0.355, 1), transform 2.0s cubic-bezier(0.215, 0.61, 0.355, 1);
 }
 
 .animate-on-scroll.scroll-active {
@@ -1438,8 +1455,9 @@ a {
 }
 
 .animate-on-scroll.slide-left {
-    transform: translateX(-40px);
+    transform: translateX(-20px);
     opacity: 0;
+    transition: opacity 2.2s cubic-bezier(0.215, 0.61, 0.355, 1), transform 2.2s cubic-bezier(0.215, 0.61, 0.355, 1);
 }
 
 .animate-on-scroll.slide-left.scroll-active {
@@ -1448,14 +1466,137 @@ a {
 }
 
 .animate-on-scroll.slide-right {
-    transform: translateX(40px);
+    transform: translateX(20px);
     opacity: 0;
+    transition: opacity 2.2s cubic-bezier(0.215, 0.61, 0.355, 1), transform 2.2s cubic-bezier(0.215, 0.61, 0.355, 1);
 }
 
 .animate-on-scroll.slide-right.scroll-active {
     transform: translateX(0);
     opacity: 1;
 }
+
+.animate-on-scroll.fade-slow {
+    opacity: 0;
+    transform: scale(0.92);
+    transition: opacity 2.6s cubic-bezier(0.215, 0.61, 0.355, 1), transform 2.6s cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+.animate-on-scroll.fade-slow.scroll-active {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Staggered Internal Text Animations for Cards/Containers */
+
+/* 1. Couple Cards */
+.couple-card .couple-img-wrapper {
+    opacity: 0;
+    transform: translateY(-40px);
+    transition: opacity 2.2s cubic-bezier(0.215, 0.61, 0.355, 1), transform 2.2s cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+.couple-card.scroll-active .couple-img-wrapper {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.2s;
+}
+
+.couple-card .couple-name,
+.couple-card .parents-info,
+.couple-card .social-links {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 2.0s cubic-bezier(0.215, 0.61, 0.355, 1), transform 2.0s cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+.couple-card.scroll-active .couple-name {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.6s;
+}
+
+.couple-card.scroll-active .parents-info {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.9s;
+}
+
+.couple-card.scroll-active .social-links {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 1.2s;
+}
+
+/* 2. Event Cards */
+.event-card h3,
+.event-card .event-time,
+.event-card .event-detail,
+.event-card .btn-maps {
+    opacity: 0;
+    transform: translateY(15px);
+    transition: opacity 1.5s cubic-bezier(0.215, 0.61, 0.355, 1), transform 1.5s cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+.event-card.scroll-active h3 {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.3s;
+}
+
+.event-card.scroll-active .event-time {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.5s;
+}
+
+.event-card.scroll-active .event-detail {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.7s;
+}
+
+.event-card.scroll-active .btn-maps {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.9s;
+}
+
+/* 3. Bank Gift & Address Cards */
+.bank-card *,
+.gift-address-card * {
+    opacity: 0;
+    transform: translateY(15px);
+    transition: opacity 1.5s cubic-bezier(0.215, 0.61, 0.355, 1), transform 1.5s cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+.bank-card.scroll-active *,
+.gift-address-card.scroll-active * {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.bank-card.scroll-active h4, .gift-address-card.scroll-active h4 { transition-delay: 0.2s; }
+.bank-card.scroll-active p, .gift-address-card.scroll-active p { transition-delay: 0.4s; }
+.bank-card.scroll-active button, .gift-address-card.scroll-active button { transition-delay: 0.6s; }
+
+/* 4. RSVP & Wishes Containers */
+.rsvp-form-container *,
+.wishes-board-container * {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 1.5s cubic-bezier(0.215, 0.61, 0.355, 1), transform 1.5s cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+.rsvp-form-container.scroll-active *,
+.wishes-board-container.scroll-active * {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.rsvp-form-container.scroll-active h3, .wishes-board-container.scroll-active h3 { transition-delay: 0.2s; }
+.rsvp-form-container.scroll-active .form-group, .wishes-board-container.scroll-active #wishes-list { transition-delay: 0.4s; }
+.rsvp-form-container.scroll-active button { transition-delay: 0.6s; }
 
 /* Running Photos Marquee */
 .running-photos-container {

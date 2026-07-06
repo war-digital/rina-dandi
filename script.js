@@ -507,8 +507,8 @@ function initScrollAnimations() {
                 }
             });
         }, {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px' // Trigger slightly before it enters fully
+            threshold: 0.15,
+            rootMargin: '0px 0px -120px 0px' // Trigger only when the element has scrolled 120px into viewport
         });
 
         animateElements.forEach(el => observer.observe(el));
