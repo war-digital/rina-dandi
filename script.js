@@ -439,21 +439,26 @@ function initRSVP() {
 
 function renderWishes(wishes) {
     const container = document.getElementById('wishes-list');
+    if (!container) return;
     container.innerHTML = '';
 
     wishes.forEach(item => {
         const wishCard = document.createElement('div');
         wishCard.className = 'wish-item';
 
-        const statusClass = item.attendance.toLowerCase().replace(' ', '-');
+        const name = item.name || item.nama || 'Anonim';
+        const wish = item.wish || item.ucapan || '';
+        const attendance = item.attendance || item.kehadiran || 'Hadir';
+
+        const statusClass = attendance.toLowerCase().replace(' ', '-');
         const formattedTime = formatRelativeTime(item.timestamp);
 
         wishCard.innerHTML = `
             <div class="wish-header">
-                <span class="wish-name">${escapeHTML(item.name)}</span>
-                <span class="wish-status ${statusClass}">${item.attendance}</span>
+                <span class="wish-name">${escapeHTML(name)}</span>
+                <span class="wish-status ${statusClass}">${attendance}</span>
             </div>
-            <p class="wish-text">${escapeHTML(item.wish)}</p>
+            <p class="wish-text">${escapeHTML(wish)}</p>
             <div class="wish-time">${formattedTime}</div>
         `;
 
@@ -474,7 +479,8 @@ function formatRelativeTime(timestamp) {
 }
 
 function escapeHTML(str) {
-    return str.replace(/[&<>'"]/g, 
+    if (str === null || str === undefined) return '';
+    return String(str).replace(/[&<>'"]/g, 
         tag => ({
             '&': '&amp;',
             '<': '&lt;',
