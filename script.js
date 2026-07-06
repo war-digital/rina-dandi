@@ -195,13 +195,26 @@ function initOpenButton() {
     const musicContainer = document.getElementById('music-player-container');
 
     btn.addEventListener('click', () => {
-        // 1. Play Background Music
-        audio.play().then(() => {
-            musicContainer.classList.add('animate-rotate-slow');
-            musicContainer.classList.remove('paused');
-        }).catch(err => {
-            console.log("Autoplay was blocked or audio failed to load: ", err);
-        });
+        // 1. Play Background Music with legacy browser promise checks
+        if (audio) {
+            const playPromise = audio.play();
+            if (playPromise !== undefined && typeof playPromise.then === 'function') {
+                playPromise.then(() => {
+                    if (musicContainer) {
+                        musicContainer.classList.add('animate-rotate-slow');
+                        musicContainer.classList.remove('paused');
+                    }
+                }).catch(err => {
+                    console.log("Autoplay was blocked or audio failed to load: ", err);
+                });
+            } else {
+                // Fallback for legacy webviews that return undefined for play()
+                if (musicContainer) {
+                    musicContainer.classList.add('animate-rotate-slow');
+                    musicContainer.classList.remove('paused');
+                }
+            }
+        }
 
         // Start Main Background Slideshow
         startMainSlideshow();
@@ -234,10 +247,14 @@ function initOpenButton() {
 function initMusicControls() {
     const musicBtn = document.getElementById('music-player-container');
     const audio = document.getElementById('wedding-audio');
+    if (!musicBtn || !audio) return;
 
     musicBtn.addEventListener('click', () => {
         if (audio.paused) {
-            audio.play();
+            const playPromise = audio.play();
+            if (playPromise !== undefined && typeof playPromise.then === 'function') {
+                playPromise.catch(err => console.log("Audio play failed: ", err));
+            }
             musicBtn.classList.remove('paused');
         } else {
             audio.pause();
