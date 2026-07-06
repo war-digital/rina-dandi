@@ -558,9 +558,9 @@ a {
 
 .verse-text {
     font-family: 'Playfair Display', 'Georgia', serif;
-    font-size: 0.95rem;
+    font-size: 0.82rem;
     color: #ffffff;
-    font-style: italic;
+    font-style: normal;
     max-width: 800px;
     margin: 0 auto 16px;
     line-height: 1.8;
@@ -752,21 +752,23 @@ a {
 
 .hero-invited {
     font-family: 'Lontara', sans-serif;
-    font-size: 1.15rem;
+    font-size: 0.8rem;
     color: var(--secondary-light);
     text-transform: uppercase;
     letter-spacing: 1px;
     margin-bottom: 12px;
     text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+    white-space: nowrap;
 }
 
 .hero-names {
     font-family: 'Lontara', sans-serif;
-    font-size: 2.8rem;
+    font-size: 2.2rem;
     color: #ffffff;
     text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
     line-height: 1.2;
     font-weight: normal;
+    white-space: nowrap;
 }
 
 .hero-date-label {
