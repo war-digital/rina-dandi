@@ -367,12 +367,26 @@ const defaultWishes = [
 function initRSVP() {
     const form = document.getElementById('rsvp-form');
     const wishesList = document.getElementById('wishes-list');
+    if (!form || !wishesList) return;
 
-    // Retrieve from localStorage or set defaults
-    let storedWishes = JSON.parse(localStorage.getItem('wedding_wishes'));
+    // Retrieve from localStorage or set defaults safely
+    let storedWishes = [];
+    try {
+        const storedData = localStorage.getItem('wedding_wishes');
+        if (storedData) {
+            storedWishes = JSON.parse(storedData);
+        }
+    } catch (e) {
+        console.warn("localStorage is not accessible: ", e);
+    }
+
     if (!storedWishes || storedWishes.length === 0) {
         storedWishes = defaultWishes;
-        localStorage.setItem('wedding_wishes', JSON.stringify(storedWishes));
+        try {
+            localStorage.setItem('wedding_wishes', JSON.stringify(storedWishes));
+        } catch (e) {
+            console.warn("Failed to set localStorage: ", e);
+        }
     }
 
     // Render wishes
@@ -385,6 +399,7 @@ function initRSVP() {
         const nameInput = document.getElementById('form-name');
         const attendanceInput = document.getElementById('form-attendance');
         const wishInput = document.getElementById('form-wish');
+        if (!nameInput || !attendanceInput || !wishInput) return;
 
         const newWish = {
             name: nameInput.value.trim(),
@@ -395,7 +410,12 @@ function initRSVP() {
 
         // Add to front of the array
         storedWishes.unshift(newWish);
-        localStorage.setItem('wedding_wishes', JSON.stringify(storedWishes));
+        
+        try {
+            localStorage.setItem('wedding_wishes', JSON.stringify(storedWishes));
+        } catch (err) {
+            console.warn("Failed to save wish to localStorage: ", err);
+        }
 
         // Re-render and reset form
         renderWishes(storedWishes);
